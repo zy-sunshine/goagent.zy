@@ -1392,7 +1392,7 @@ def main():
 
     if common.DNS_ENABLE:
         host, port = common.DNS_LISTEN.split(':')
-        server = DNSServer((host, int(port)))
+        server = DNSServer((host, int(port)), None)
         server.remote_address = (common.DNS_REMOTE, 53)
         server.timeout = common.DNS_TIMEOUT
         server.max_cache_size = common.DNS_CACHESIZE

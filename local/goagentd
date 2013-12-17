@@ -22,28 +22,35 @@
 ### END INIT INFO
 
 # source function library
-. /etc/rc.d/init.d/functions
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+fi
 
 prog="goagentd"
 PYTHON=/usr/bin/python
 proxy=/home/netsec/work/goagent.zy/local/proxy.py
-log=/home/netsec/work/goagent.zy/local/log
+log=/var/log/goagentd.log
+lock=/var/lock/goagentd
 
 runlevel=$(set -- $(runlevel); eval "echo \$$#" )
 
 start()
 {
-   echo -n $"Starting $prog: "
+   echo $"Starting $prog: "
+   if [ -f $lock ]; then
+      echo "$prog is running, please stop it and start."
+      return
+   fi
    [ -f "$log" ] && mv -f "$log" "$log.old"
    $PYTHON $proxy 1>&$log 2>&1 &
-   touch /var/lock/subsys/goagentd
+   touch $lock
 }
 
 stop()
 {
-   echo -n $"Stopping $prog: "
-   kill $(ps aux | grep "[p]ython" | awk '{print $2}')
-   rm -f /var/lock/subsys/goagentd
+   echo $"Stopping $prog: "
+   kill $(ps aux | grep "$proxy" | awk '{print $2}')
+   rm -f $lock
 }
 
 restart() {
